@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <script>(function(){var t=localStorage.getItem('tn-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t)})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects — Thiago Nonato</title>
+  <meta name="description" content="Projetos selecionados de Thiago Nonato — automação, dados e infraestrutura." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="nav">
+    <a href="index.html" class="logo">Thiago Nonato</a>
+    <nav>
+      <a href="about.html">About</a>
+      <a href="projects.html" class="active">Projects</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+      <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </header>
+
+  <main class="page">
+    <section class="page-head">
+      <p class="eyebrow">Selected work</p>
+      <h1>Projetos que <em>resolvem problemas</em> reais.</h1>
+      <p class="page-sub">Uma seleção de iniciativas em automação, engenharia de dados e infraestrutura.</p>
+    </section>
+
+    <section class="projects-list">
+
+      <article class="project">
+        <div class="project-cover" data-color="violet">
+          <span class="card-tag">Python · Selenium · Pandas</span>
+        </div>
+        <div class="project-info">
+          <p class="project-year">2024</p>
+          <h3>Pipeline de Web Scraping</h3>
+          <p>
+            Automação para coleta de dados de portais públicos, com tratamento, deduplicação
+            e exportação para planilhas estruturadas. Reduziu em horas o tempo gasto em consultas manuais.
+          </p>
+          <ul class="project-stack">
+            <li>Python</li><li>Selenium</li><li>Pandas</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="project reverse">
+        <div class="project-cover" data-color="amber">
+          <span class="card-tag">Power BI · Excel</span>
+        </div>
+        <div class="project-info">
+          <p class="project-year">2023</p>
+          <h3>Dashboards de Operação</h3>
+          <p>
+            Painéis interativos para acompanhar chamados, SLAs e performance de equipes.
+            Conectados a fontes Excel e bancos relacionais, com atualização programada.
+          </p>
+          <ul class="project-stack">
+            <li>Power BI</li><li>DAX</li><li>Excel</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="project-cover" data-color="green">
+          <span class="card-tag">Infraestrutura · Suporte</span>
+        </div>
+        <div class="project-info">
+          <p class="project-year">2022</p>
+          <h3>Gestão de Acessos Corporativa</h3>
+          <p>
+            Estruturação de processos de criação, revisão e revogação de usuários
+            em ambientes com múltiplos sistemas — reduzindo riscos e tempo de onboarding.
+          </p>
+          <ul class="project-stack">
+            <li>AD</li><li>Service Desk</li><li>ITIL</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="project reverse">
+        <div class="project-cover" data-color="rose">
+          <span class="card-tag">Gestão</span>
+        </div>
+        <div class="project-info">
+          <p class="project-year">2023</p>
+          <h3>Coordenação de Projetos</h3>
+          <p>
+            Acompanhamento de entregas, reuniões com stakeholders e organização
+            de backlog para times de suporte e desenvolvimento.
+          </p>
+          <ul class="project-stack">
+            <li>Jira</li><li>Trello</li><li>Scrum</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="project-cover" data-color="slate">
+          <span class="card-tag">Voluntariado · Teatro</span>
+        </div>
+        <div class="project-info">
+          <p class="project-year">2019 — 2022</p>
+          <h3>Simão — O Musical</h3>
+          <p>
+            Produção de peças e musicais como voluntário na Cia. Vertcall.
+            Apresentação principal no Teatro Escola Basileu França em 2022.
+          </p>
+          <ul class="project-stack">
+            <li>Produção</li><li>Voluntariado</li>
+          </ul>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="cta-block">
+      <h2>Vamos conversar?</h2>
+      <p>Aberto a oportunidades em suporte, dados e automação.</p>
+      <a href="mailto:thiagonoonato.75@gmail.com" class="btn-primary">Enviar e-mail →</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <p>© 2026 Thiago Nonato</p>
+    </div>
+    <div class="socials">
+      <a href="https://linkedin.com/in/thiagononato" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:thiagonoonato.75@gmail.com">Email</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
