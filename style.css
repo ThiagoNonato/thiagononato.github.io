@@ -498,6 +498,8 @@ a { color: inherit; text-decoration: none; }
   padding: 1.4rem;
   overflow: hidden;
   transition: transform 0.4s ease;
+  background-size: cover;
+  background-position: center;
 }
 .project:hover .project-cover { transform: scale(1.02); }
 
