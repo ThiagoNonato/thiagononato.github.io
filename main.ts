@@ -52,7 +52,7 @@ const initShapes = () => {
 
   interface ShapeEntry { el: HTMLElement; xPx: number; size: number; landedY: number; }
   const activeShapes: ShapeEntry[] = [];
-  const MAX_SHAPES    = 100;
+  const MAX_SHAPES    = 150;
   const MAX_PILE_H    = vh * 0.30; // pile can grow up to 30% of viewport height
 
   const spawnShape = () => {
@@ -101,7 +101,7 @@ const initShapes = () => {
         y: landedY,
         rotation: Math.random() * 16 - 8,
         opacity: 1,
-        duration: Math.random() * 1.2 + 0.6,
+        duration: Math.random() * 2.0 + 1.5,
         ease: 'power2.in',
       }
     );
@@ -122,11 +122,12 @@ const initShapes = () => {
     }
   };
 
-  // Dense initial fill — edge zones first, then scatter
-  for (let i = 0; i < 85; i++) {
-    setTimeout(spawnShape, i * 65);
+  // Initial fill — espaçado para a queda ser visível
+  for (let i = 0; i < 70; i++) {
+    setTimeout(spawnShape, i * 130);
   }
-  setInterval(spawnShape, 260);
+  // Fluxo contínuo com volume alto
+  setInterval(spawnShape, 100);
 };
 
 // Toggle de tema com persistência e tipagem
