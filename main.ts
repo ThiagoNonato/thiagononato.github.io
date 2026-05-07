@@ -10,7 +10,7 @@ const initShapes = () => {
   document.body.appendChild(container);
 
   const engine = Engine.create();
-  engine.gravity.y = 0.9;
+  engine.gravity.y = 0.03;
 
   const render = Render.create({
     element: container,
@@ -18,7 +18,7 @@ const initShapes = () => {
     options: { width: vw, height: vh, background: 'transparent', wireframes: false },
   });
   render.canvas.style.background = 'transparent';
-  render.canvas.style.filter = 'saturate(0.82)';
+  // grayscale — saturate filter não necessário
 
   const wall = { fillStyle: 'transparent', strokeStyle: 'transparent', lineWidth: 0 };
   // category 2 | mask 1 → colide só com shapes normais (category 1), ignora dying (category 4)
@@ -29,28 +29,21 @@ const initShapes = () => {
     Bodies.rectangle(vw + 25, vh / 2,   50,     vh * 3, { isStatic: true, render: wall, collisionFilter: wallFilter }),
   ]);
 
-  // 30 cores cobrindo o espectro completo com variantes
+  // Escala de cinza: branco → preto
   const colors = [
-    '#ef4444', '#dc2626', '#f87171',           // vermelhos
-    '#f97316', '#ea580c', '#fb923c',           // laranjas
-    '#f59e0b', '#d97706', '#fbbf24', '#fde68a', // ambers/amarelos
-    '#22c55e', '#16a34a', '#4ade80',           // verdes
-    '#10b981', '#059669', '#6ee7b7',           // esmeraldas
-    '#14b8a6', '#0d9488',                      // teals
-    '#06b6d4', '#0891b2', '#67e8f9',           // cyans
-    '#3b82f6', '#2563eb', '#93c5fd',           // azuis
-    '#6366f1', '#4f46e5',                      // índigos
-    '#8b5cf6', '#7c3aed', '#c4b5fd',           // violetas
-    '#ec4899', '#db2777', '#f9a8d4',           // pinks
+    '#f2f2f2', '#e0e0e0', '#cccccc', '#b8b8b8',
+    '#a3a3a3', '#8f8f8f', '#7a7a7a', '#666666',
+    '#525252', '#3d3d3d', '#292929', '#1f1f1f',
+    '#141414', '#0a0a0a',
   ];
 
   const makeBody = (x: number, y: number, size: number, color: string) => {
     const opts = {
       friction:       0.65,
       restitution:    0.08,
-      frictionAir:    0.006,
+      frictionAir:    0.012,
       frictionStatic: 0.4,
-      render: { fillStyle: color, strokeStyle: 'rgba(0,0,0,0.20)', lineWidth: 1, opacity: 0.08 },
+      render: { fillStyle: color, strokeStyle: 'rgba(0,0,0,0.12)', lineWidth: 1, opacity: 0.08 },
       collisionFilter: { category: 1, mask: 0xFFFF },
     };
 
@@ -82,7 +75,7 @@ const initShapes = () => {
   const dyingBodies  = new Set<PhysBody>();
   const bodyExpiry   = new Map<PhysBody, number>();
   const MAX          = 140;
-  const FADE_RATE    = 0.004; // ~4 s at 60 fps
+  const FADE_RATE    = 0.002; // ~8 s at 60 fps
 
   const retire = (b: PhysBody) => {
     const idx = activeBodies.indexOf(b);
@@ -103,8 +96,8 @@ const initShapes = () => {
     World.add(engine.world, b);
     activeBodies.push(b);
 
-    // Tempo de vida aleatório: 35–55 segundos
-    bodyExpiry.set(b, Date.now() + (35 + Math.random() * 20) * 1000);
+    // Tempo de vida aleatório: 100–160 segundos
+    bodyExpiry.set(b, Date.now() + (100 + Math.random() * 60) * 1000);
 
     // Hard cap para segurança de memória
     if (activeBodies.length > MAX) retire(activeBodies[0]);
