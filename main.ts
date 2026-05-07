@@ -59,13 +59,13 @@ const initShapeBed = () => {
   const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#f97316', '#06b6d4', '#ec4899'];
   const types = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'octagon', 'diamond'];
 
-  (['left', 'right'] as const).forEach(side => {
+  (['left', 'right', 'bottom'] as const).forEach(side => {
     const bed = document.createElement('div');
     bed.className = `shape-bed ${side}`;
     document.body.appendChild(bed);
 
     const activeShapes: HTMLElement[] = [];
-    const maxShapes = 55;
+    const maxShapes = side === 'bottom' ? 35 : 55;
 
     const spawnShape = () => {
       const shape = document.createElement('div');
@@ -88,7 +88,7 @@ const initShapeBed = () => {
       // Cores sólidas
       shape.style.opacity = '1';
 
-      const xPercent = Math.random() * 88;
+      const xPercent = Math.random() * 95;
       shape.style.left = `${xPercent}%`;
       shape.style.top = '0px';
       shape.style.bottom = 'auto';
@@ -97,13 +97,19 @@ const initShapeBed = () => {
       activeShapes.push(shape);
 
       const vh = window.innerHeight;
-      const floor = vh - size - 8;
-      const maxPileHeight = vh * 0.25;
+      const floor = vh - size - 2;
 
-      // xRatio: 0 = borda da tela (pico da pilha), 1 = lado aberto (base)
-      const xRatio = side === 'left' ? xPercent / 88 : (88 - xPercent) / 88;
-      const pileHeightAtX = maxPileHeight * (1 - xRatio);
-      const landingY = floor - Math.random() * pileHeightAtX;
+      // Chão: camada fina e uniforme; laterais: perfil triangular
+      let landingY: number;
+      if (side === 'bottom') {
+        landingY = floor - Math.random() * vh * 0.05;
+      } else {
+        const maxPileHeight = vh * 0.25;
+        // xRatio: 0 = borda da tela (pico da pilha), 1 = lado aberto (base)
+        const xRatio = side === 'left' ? xPercent / 95 : (95 - xPercent) / 95;
+        const pileHeightAtX = maxPileHeight * (1 - xRatio);
+        landingY = floor - Math.random() * pileHeightAtX;
+      }
 
       gsap.fromTo(shape,
         { y: -size - 10, rotation: Math.random() * 200 - 100 },
@@ -128,12 +134,13 @@ const initShapeBed = () => {
     };
 
     // Preenchimento inicial denso
-    for (let i = 0; i < 50; i++) {
+    const initialCount = side === 'bottom' ? 30 : 50;
+    for (let i = 0; i < initialCount; i++) {
       setTimeout(spawnShape, i * 80);
     }
 
     // Fluxo contínuo
-    setInterval(spawnShape, 500);
+    setInterval(spawnShape, side === 'bottom' ? 900 : 500);
   });
 };
 

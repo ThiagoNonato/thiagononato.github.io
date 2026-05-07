@@ -79,6 +79,7 @@ body {
 }
 .shape-bed.left { left: 0; }
 .shape-bed.right { right: 0; }
+.shape-bed.bottom { left: 0; width: 100%; }
 
 .shape.circle { border-radius: 50%; }
 .shape.triangle {
