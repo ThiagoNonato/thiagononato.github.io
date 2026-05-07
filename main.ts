@@ -43,7 +43,7 @@ const initShapes = () => {
       restitution:    0.08,
       frictionAir:    0.006,
       frictionStatic: 0.4,
-      render: { fillStyle: color, strokeStyle: 'rgba(0,0,0,0)', lineWidth: 0, opacity: 0.08 },
+      render: { fillStyle: color, strokeStyle: 'rgba(0,0,0,0.20)', lineWidth: 1, opacity: 0.08 },
     };
 
     const t = Math.floor(Math.random() * 7);
