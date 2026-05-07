@@ -54,24 +54,24 @@ const initShapes = () => {
   }
 };
 
-// Cama de formas com física de gravidade
+// Cama de formas com física de gravidade e perfil triangular
 const initShapeBed = () => {
-  const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
+  const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#f97316', '#06b6d4', '#ec4899'];
   const types = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'octagon', 'diamond'];
 
-  ['left', 'right'].forEach(side => {
+  (['left', 'right'] as const).forEach(side => {
     const bed = document.createElement('div');
     bed.className = `shape-bed ${side}`;
     document.body.appendChild(bed);
 
     const activeShapes: HTMLElement[] = [];
-    const maxShapes = 22;
+    const maxShapes = 55;
 
     const spawnShape = () => {
       const shape = document.createElement('div');
       const type = types[Math.floor(Math.random() * types.length)];
       const color = colors[Math.floor(Math.random() * colors.length)];
-      const size = Math.random() * 25 + 12;
+      const size = Math.random() * 33 + 14;
 
       shape.className = `shape ${type}`;
       if (type !== 'triangle') {
@@ -80,9 +80,16 @@ const initShapeBed = () => {
         shape.style.backgroundColor = color;
       } else {
         shape.style.setProperty('--shape-color', color);
+        shape.style.borderLeftWidth = `${size * 0.6}px`;
+        shape.style.borderRightWidth = `${size * 0.6}px`;
+        shape.style.borderBottomWidth = `${size}px`;
       }
 
-      shape.style.left = `${Math.random() * 80}%`;
+      // Cores sólidas
+      shape.style.opacity = '1';
+
+      const xPercent = Math.random() * 88;
+      shape.style.left = `${xPercent}%`;
       shape.style.top = '0px';
       shape.style.bottom = 'auto';
 
@@ -90,39 +97,43 @@ const initShapeBed = () => {
       activeShapes.push(shape);
 
       const vh = window.innerHeight;
-      // Posição de pouso: entre 86% e 96% da altura do container (fundo da tela)
-      const landingY = vh * 0.86 + Math.random() * vh * 0.10 - size;
+      const floor = vh - size - 8;
+      const maxPileHeight = vh * 0.25;
+
+      // xRatio: 0 = borda da tela (pico da pilha), 1 = lado aberto (base)
+      const xRatio = side === 'left' ? xPercent / 88 : (88 - xPercent) / 88;
+      const pileHeightAtX = maxPileHeight * (1 - xRatio);
+      const landingY = floor - Math.random() * pileHeightAtX;
 
       gsap.fromTo(shape,
-        { y: -size - 10, rotation: Math.random() * 180 - 90 },
+        { y: -size - 10, rotation: Math.random() * 200 - 100 },
         {
           y: landingY,
-          rotation: Math.random() * 20 - 10,
-          duration: Math.random() * 1.0 + 0.8,
+          rotation: Math.random() * 25 - 12,
+          duration: Math.random() * 0.9 + 0.5,
           ease: 'bounce.out',
         }
       );
 
-      // Remove a forma mais antiga quando a cama estiver cheia
       if (activeShapes.length > maxShapes) {
         const oldest = activeShapes.shift()!;
         gsap.to(oldest, {
-          y: `+=${vh * 0.25}`,
+          y: `+=${vh * 0.3}`,
           opacity: 0,
-          duration: 0.7,
+          duration: 0.6,
           ease: 'power2.in',
           onComplete: () => oldest.remove(),
         });
       }
     };
 
-    // Preenchimento inicial em sequência
-    for (let i = 0; i < 20; i++) {
-      setTimeout(spawnShape, i * 160);
+    // Preenchimento inicial denso
+    for (let i = 0; i < 50; i++) {
+      setTimeout(spawnShape, i * 80);
     }
 
     // Fluxo contínuo
-    setInterval(spawnShape, 750);
+    setInterval(spawnShape, 500);
   });
 };
 

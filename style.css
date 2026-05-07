@@ -74,8 +74,8 @@ body {
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 80%, rgba(0,0,0,0.4) 86%, black 90%);
-  mask-image: linear-gradient(to bottom, transparent 80%, rgba(0,0,0,0.4) 86%, black 90%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 65%, rgba(0,0,0,0.5) 68%, black 72%);
+  mask-image: linear-gradient(to bottom, transparent 65%, rgba(0,0,0,0.5) 68%, black 72%);
 }
 .shape-bed.left { left: 0; }
 .shape-bed.right { right: 0; }
