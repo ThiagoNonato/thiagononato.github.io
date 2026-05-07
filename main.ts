@@ -54,24 +54,26 @@ const initShapes = () => {
   }
 };
 
-// Cama de formas estáticas nas laterais inferiores
+// Cama de formas com física de gravidade
 const initShapeBed = () => {
   const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
   const types = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'octagon', 'diamond'];
-  
+
   ['left', 'right'].forEach(side => {
     const bed = document.createElement('div');
     bed.className = `shape-bed ${side}`;
     document.body.appendChild(bed);
 
-    // Cria uma densidade de formas na cama
-    for (let i = 0; i < 25; i++) {
+    const activeShapes: HTMLElement[] = [];
+    const maxShapes = 22;
+
+    const spawnShape = () => {
       const shape = document.createElement('div');
       const type = types[Math.floor(Math.random() * types.length)];
       const color = colors[Math.floor(Math.random() * colors.length)];
-      const size = Math.random() * 30 + 15;
+      const size = Math.random() * 25 + 12;
 
-      shape.className = `shape static-shape ${type}`;
+      shape.className = `shape ${type}`;
       if (type !== 'triangle') {
         shape.style.width = `${size}px`;
         shape.style.height = `${size}px`;
@@ -80,25 +82,47 @@ const initShapeBed = () => {
         shape.style.setProperty('--shape-color', color);
       }
 
-      shape.style.left = `${Math.random() * 100}%`;
-      shape.style.bottom = `${Math.random() * 100}%`;
-      shape.style.transform = `rotate(${Math.random() * 360}deg)`;
-      
-      bed.appendChild(shape);
+      shape.style.left = `${Math.random() * 80}%`;
+      shape.style.top = '0px';
+      shape.style.bottom = 'auto';
 
-      // Reação ao Scroll (Física leve)
-      window.addEventListener('scroll', () => {
-        const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-        const moveAmount = scrollPercent * 40; // Movimento máximo de 40px
-        
-        gsap.to(shape, {
-          y: -moveAmount * (Math.random() * 0.5 + 0.5), // Cada um move em velocidade levemente diferente
-          rotation: `+=${scrollPercent * 10}`,
-          duration: 0.6,
-          ease: 'power1.out'
+      bed.appendChild(shape);
+      activeShapes.push(shape);
+
+      const vh = window.innerHeight;
+      // Posição de pouso: entre 86% e 96% da altura do container (fundo da tela)
+      const landingY = vh * 0.86 + Math.random() * vh * 0.10 - size;
+
+      gsap.fromTo(shape,
+        { y: -size - 10, rotation: Math.random() * 180 - 90 },
+        {
+          y: landingY,
+          rotation: Math.random() * 20 - 10,
+          duration: Math.random() * 1.0 + 0.8,
+          ease: 'bounce.out',
+        }
+      );
+
+      // Remove a forma mais antiga quando a cama estiver cheia
+      if (activeShapes.length > maxShapes) {
+        const oldest = activeShapes.shift()!;
+        gsap.to(oldest, {
+          y: `+=${vh * 0.25}`,
+          opacity: 0,
+          duration: 0.7,
+          ease: 'power2.in',
+          onComplete: () => oldest.remove(),
         });
-      });
+      }
+    };
+
+    // Preenchimento inicial em sequência
+    for (let i = 0; i < 20; i++) {
+      setTimeout(spawnShape, i * 160);
     }
+
+    // Fluxo contínuo
+    setInterval(spawnShape, 750);
   });
 };
 
