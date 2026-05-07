@@ -21,10 +21,12 @@ const initShapes = () => {
   render.canvas.style.filter = 'saturate(0.82)';
 
   const wall = { fillStyle: 'transparent', strokeStyle: 'transparent', lineWidth: 0 };
+  // category 2 | mask 1 → colide só com shapes normais (category 1), ignora dying (category 4)
+  const wallFilter = { category: 2, mask: 1 };
   World.add(engine.world, [
-    Bodies.rectangle(vw / 2,  vh + 25,  vw * 2, 50,    { isStatic: true, render: wall }),
-    Bodies.rectangle(-25,     vh / 2,   50,     vh * 3, { isStatic: true, render: wall }),
-    Bodies.rectangle(vw + 25, vh / 2,   50,     vh * 3, { isStatic: true, render: wall }),
+    Bodies.rectangle(vw / 2,  vh + 25,  vw * 2, 50,    { isStatic: true, render: wall, collisionFilter: wallFilter }),
+    Bodies.rectangle(-25,     vh / 2,   50,     vh * 3, { isStatic: true, render: wall, collisionFilter: wallFilter }),
+    Bodies.rectangle(vw + 25, vh / 2,   50,     vh * 3, { isStatic: true, render: wall, collisionFilter: wallFilter }),
   ]);
 
   // 30 cores cobrindo o espectro completo com variantes
@@ -49,6 +51,7 @@ const initShapes = () => {
       frictionAir:    0.006,
       frictionStatic: 0.4,
       render: { fillStyle: color, strokeStyle: 'rgba(0,0,0,0.20)', lineWidth: 1, opacity: 0.08 },
+      collisionFilter: { category: 1, mask: 0xFFFF },
     };
 
     const t = Math.floor(Math.random() * 7);
@@ -85,6 +88,9 @@ const initShapes = () => {
     const idx = activeBodies.indexOf(b);
     if (idx !== -1) activeBodies.splice(idx, 1);
     bodyExpiry.delete(b);
+    // category 4 | mask 1 → ainda empurra shapes normais (category 1)
+    // mas cai através do chão e paredes (category 2, excluídos da mask)
+    b.collisionFilter = { category: 4, mask: 1 };
     dyingBodies.add(b);
   };
 
@@ -118,10 +124,10 @@ const initShapes = () => {
       b.render.opacity = 0.08 + t * 0.92;
     }
 
-    // Fade-out suave (~4 s) para os dying
+    // Dying: cai pela tela e some enquanto desce
     for (const b of [...dyingBodies]) {
       b.render.opacity = Math.max(0, (b.render.opacity ?? 1) - FADE_RATE);
-      if ((b.render.opacity ?? 0) < 0.01) {
+      if (b.position.y > vh + 150 || (b.render.opacity ?? 0) < 0.01) {
         World.remove(engine.world, b);
         dyingBodies.delete(b);
       }
