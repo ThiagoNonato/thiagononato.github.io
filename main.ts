@@ -7,13 +7,13 @@ const initShapes = () => {
   document.body.appendChild(container);
 
   const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
-  const types = ['circle', 'square', 'triangle'];
+  const types = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'octagon', 'diamond'];
 
   const createShape = (side: 'left' | 'right') => {
     const shape = document.createElement('div');
     const type = types[Math.floor(Math.random() * types.length)];
     const color = colors[Math.floor(Math.random() * colors.length)];
-    const size = Math.random() * 20 + 10;
+    const size = Math.random() * 25 + 10;
 
     shape.className = `shape ${type}`;
     if (type !== 'triangle') {
@@ -26,8 +26,8 @@ const initShapes = () => {
 
     // Posição horizontal (lateral)
     const xPos = side === 'left' 
-      ? Math.random() * 10 
-      : 90 + Math.random() * 10;
+      ? Math.random() * 15 
+      : 85 + Math.random() * 15;
     
     shape.style.left = `${xPos}%`;
 
@@ -36,9 +36,9 @@ const initShapes = () => {
     // Animação GSAP: "Vulcão" de baixo para cima
     gsap.to(shape, {
       y: -window.innerHeight - 100,
-      x: (Math.random() - 0.5) * 100, // Leve dispersão lateral
-      rotation: Math.random() * 360,
-      duration: Math.random() * 5 + 5,
+      x: (Math.random() - 0.5) * 150, // Maior dispersão lateral
+      rotation: Math.random() * 720, // Mais rotação
+      duration: Math.random() * 6 + 4,
       ease: 'none',
       onComplete: () => {
         shape.remove();
@@ -47,10 +47,10 @@ const initShapes = () => {
     });
   };
 
-  // Inicializa algumas formas de cada lado
-  for (let i = 0; i < 15; i++) {
-    setTimeout(() => createShape('left'), i * 600);
-    setTimeout(() => createShape('right'), i * 600 + 300);
+  // Inicializa muitas formas de cada lado para um volume maior
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => createShape('left'), i * 300);
+    setTimeout(() => createShape('right'), i * 300 + 150);
   }
 };
 
