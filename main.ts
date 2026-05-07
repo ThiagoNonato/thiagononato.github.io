@@ -54,6 +54,54 @@ const initShapes = () => {
   }
 };
 
+// Cama de formas estáticas nas laterais inferiores
+const initShapeBed = () => {
+  const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
+  const types = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'octagon', 'diamond'];
+  
+  ['left', 'right'].forEach(side => {
+    const bed = document.createElement('div');
+    bed.className = `shape-bed ${side}`;
+    document.body.appendChild(bed);
+
+    // Cria uma densidade de formas na cama
+    for (let i = 0; i < 25; i++) {
+      const shape = document.createElement('div');
+      const type = types[Math.floor(Math.random() * types.length)];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = Math.random() * 30 + 15;
+
+      shape.className = `shape static-shape ${type}`;
+      if (type !== 'triangle') {
+        shape.style.width = `${size}px`;
+        shape.style.height = `${size}px`;
+        shape.style.backgroundColor = color;
+      } else {
+        shape.style.setProperty('--shape-color', color);
+      }
+
+      shape.style.left = `${Math.random() * 100}%`;
+      shape.style.bottom = `${Math.random() * 100}%`;
+      shape.style.transform = `rotate(${Math.random() * 360}deg)`;
+      
+      bed.appendChild(shape);
+
+      // Reação ao Scroll (Física leve)
+      window.addEventListener('scroll', () => {
+        const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+        const moveAmount = scrollPercent * 40; // Movimento máximo de 40px
+        
+        gsap.to(shape, {
+          y: -moveAmount * (Math.random() * 0.5 + 0.5), // Cada um move em velocidade levemente diferente
+          rotation: `+=${scrollPercent * 10}`,
+          duration: 0.6,
+          ease: 'power1.out'
+        });
+      });
+    }
+  });
+};
+
 // Toggle de tema com persistência e tipagem
 (() => {
   const btn = document.getElementById('themeToggle') as HTMLButtonElement | null;
@@ -83,6 +131,7 @@ const initShapes = () => {
   // Inicializa formas e animação de entrada
   window.addEventListener('DOMContentLoaded', () => {
     initShapes();
+    initShapeBed();
     
     gsap.from('main', {
       opacity: 0,

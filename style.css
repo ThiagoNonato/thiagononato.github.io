@@ -65,6 +65,25 @@ body {
   opacity: 0.4;
 }
 
+/* Camada de base (bed) */
+.shape-bed {
+  position: fixed;
+  bottom: 0;
+  width: 20%;
+  height: 14vh;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.shape-bed.left { left: 0; }
+.shape-bed.right { right: 0; }
+
+.static-shape {
+  position: absolute;
+  opacity: 0.6;
+  filter: brightness(0.9);
+}
+
 .shape.circle { border-radius: 50%; }
 .shape.triangle {
   width: 0;
