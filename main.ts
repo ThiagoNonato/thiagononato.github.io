@@ -26,6 +26,7 @@ const initShapes = () => {
     },
   });
   render.canvas.style.background = 'transparent';
+  render.canvas.style.filter = 'saturate(0.82)';
 
   // Invisible static walls: floor + left + right
   const wall = { fillStyle: 'transparent', strokeStyle: 'transparent', lineWidth: 0 };
@@ -73,6 +74,7 @@ const initShapes = () => {
       : vw - edgeW + Math.random() * edgeW;
 
   const activeBodies: ReturnType<typeof Bodies.circle>[] = [];
+  const dyingBodies  = new Set<ReturnType<typeof Bodies.circle>>();
   const MAX = 140;
 
   const spawn = () => {
@@ -84,18 +86,24 @@ const initShapes = () => {
     World.add(engine.world, b);
     activeBodies.push(b);
 
-    // Remove oldest when over limit
+    // Fade out oldest when over limit instead of instant removal
     if (activeBodies.length > MAX) {
-      const old = activeBodies.shift()!;
-      World.remove(engine.world, old);
+      dyingBodies.add(activeBodies.shift()!);
     }
   };
 
-  // Fade in colour as shape descends: watery (0.08) → solid (1.0)
+  // Fade in as shape descends; fade out dying shapes over ~1.5 s
   Events.on(engine, 'afterUpdate', () => {
     for (const b of activeBodies) {
       const t = Math.max(0, Math.min(1, b.position.y / (vh * 0.65)));
       b.render.opacity = 0.08 + t * 0.92;
+    }
+    for (const b of [...dyingBodies]) {
+      b.render.opacity = Math.max(0, (b.render.opacity ?? 1) - 0.010);
+      if ((b.render.opacity ?? 0) < 0.01) {
+        World.remove(engine.world, b);
+        dyingBodies.delete(b);
+      }
     }
   });
 
