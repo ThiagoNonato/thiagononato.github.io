@@ -1,168 +1,149 @@
 import { gsap } from 'gsap';
 
-// Gerador de formas geométricas animadas
 const initShapes = () => {
   const container = document.createElement('div');
   container.className = 'bg-shapes';
   document.body.appendChild(container);
 
-  const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
-  const types = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'octagon', 'diamond'];
-
-  const createShape = (side: 'left' | 'right') => {
-    const shape = document.createElement('div');
-    const type = types[Math.floor(Math.random() * types.length)];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const size = Math.random() * 25 + 10;
-
-    shape.className = `shape ${type}`;
-    if (type !== 'triangle') {
-      shape.style.width = `${size}px`;
-      shape.style.height = `${size}px`;
-      shape.style.backgroundColor = color;
-    } else {
-      shape.style.setProperty('--shape-color', color);
-    }
-
-    // Posição horizontal (lateral)
-    const xPos = side === 'left' 
-      ? Math.random() * 15 
-      : 85 + Math.random() * 15;
-    
-    shape.style.left = `${xPos}%`;
-
-    container.appendChild(shape);
-
-    // Animação GSAP: "Vulcão" de baixo para cima
-    gsap.to(shape, {
-      y: -window.innerHeight - 100,
-      x: (Math.random() - 0.5) * 150, // Maior dispersão lateral
-      rotation: Math.random() * 720, // Mais rotação
-      duration: Math.random() * 6 + 4,
-      ease: 'none',
-      onComplete: () => {
-        shape.remove();
-        createShape(side); // Cria uma nova para manter o fluxo
-      }
-    });
-  };
-
-  // Inicializa muitas formas de cada lado para um volume maior
-  for (let i = 0; i < 40; i++) {
-    setTimeout(() => createShape('left'), i * 300);
-    setTimeout(() => createShape('right'), i * 300 + 150);
-  }
-};
-
-// Cama de formas com física de gravidade e perfil triangular
-const initShapeBed = () => {
   const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#f97316', '#06b6d4', '#ec4899'];
   const types = ['circle', 'square', 'triangle', 'pentagon', 'hexagon', 'octagon', 'diamond'];
 
-  (['left', 'right', 'bottom'] as const).forEach(side => {
-    const bed = document.createElement('div');
-    bed.className = `shape-bed ${side}`;
-    document.body.appendChild(bed);
+  let vw = window.innerWidth;
+  let vh = window.innerHeight;
 
-    const activeShapes: HTMLElement[] = [];
-    const maxShapes = side === 'bottom' ? 35 : 55;
+  // Column-based height map: tracks the top of the pile in each 12px-wide column
+  const COL = 12;
+  let numCols = Math.ceil(vw / COL);
+  let heightMap = new Array(numCols).fill(vh); // starts at floor (bottom of viewport)
 
-    const spawnShape = () => {
-      const shape = document.createElement('div');
-      const type = types[Math.floor(Math.random() * types.length)];
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      const size = Math.random() * 33 + 14;
+  window.addEventListener('resize', () => {
+    vw = window.innerWidth;
+    vh = window.innerHeight;
+    numCols = Math.ceil(vw / COL);
+    heightMap = new Array(numCols).fill(vh);
+  });
 
-      shape.className = `shape ${type}`;
-      if (type !== 'triangle') {
-        shape.style.width = `${size}px`;
-        shape.style.height = `${size}px`;
-        shape.style.backgroundColor = color;
-      } else {
-        shape.style.setProperty('--shape-color', color);
-        shape.style.borderLeftWidth = `${size * 0.6}px`;
-        shape.style.borderRightWidth = `${size * 0.6}px`;
-        shape.style.borderBottomWidth = `${size}px`;
-      }
+  const colStart = (xPx: number) => Math.max(0, Math.floor(xPx / COL));
+  const colEnd   = (xPx: number, w: number) => Math.min(numCols - 1, Math.floor((xPx + w) / COL));
 
-      // Cores sólidas
-      shape.style.opacity = '1';
+  const getPileTop = (xPx: number, w: number): number => {
+    let min = vh;
+    for (let i = colStart(xPx); i <= colEnd(xPx, w); i++) min = Math.min(min, heightMap[i]);
+    return min;
+  };
 
-      const xPercent = Math.random() * 95;
-      shape.style.left = `${xPercent}%`;
-      shape.style.top = '0px';
-      shape.style.bottom = 'auto';
+  const claimColumns = (xPx: number, w: number, topY: number) => {
+    for (let i = colStart(xPx); i <= colEnd(xPx, w); i++) heightMap[i] = Math.min(heightMap[i], topY);
+  };
 
-      bed.appendChild(shape);
-      activeShapes.push(shape);
+  const recalcHeightMap = (shapes: ShapeEntry[]) => {
+    heightMap.fill(vh);
+    for (const s of shapes) claimColumns(s.xPx, s.size, s.landedY);
+  };
 
-      const vh = window.innerHeight;
-      const floor = vh - size - 2;
+  // 40% left edge | 40% right edge | 20% center
+  const getSpawnX = (size: number): number => {
+    const edgeW = vw * 0.18;
+    const r = Math.random();
+    if (r < 0.40) return Math.random() * Math.max(0, edgeW - size);
+    if (r < 0.80) return vw - edgeW + Math.random() * Math.max(0, edgeW - size);
+    return edgeW + Math.random() * Math.max(0, vw - 2 * edgeW - size);
+  };
 
-      // Chão: camada fina e uniforme; laterais: perfil triangular
-      let landingY: number;
-      if (side === 'bottom') {
-        landingY = floor - Math.random() * vh * 0.05;
-      } else {
-        const maxPileHeight = vh * 0.25;
-        // xRatio: 0 = borda da tela (pico da pilha), 1 = lado aberto (base)
-        const xRatio = side === 'left' ? xPercent / 95 : (95 - xPercent) / 95;
-        const pileHeightAtX = maxPileHeight * (1 - xRatio);
-        landingY = floor - Math.random() * pileHeightAtX;
-      }
+  interface ShapeEntry { el: HTMLElement; xPx: number; size: number; landedY: number; }
+  const activeShapes: ShapeEntry[] = [];
+  const MAX_SHAPES    = 100;
+  const MAX_PILE_H    = vh * 0.30; // pile can grow up to 30% of viewport height
 
-      gsap.fromTo(shape,
-        { y: -size - 10, rotation: Math.random() * 200 - 100 },
-        {
-          y: landingY,
-          rotation: Math.random() * 25 - 12,
-          duration: Math.random() * 0.9 + 0.5,
-          ease: 'bounce.out',
-        }
-      );
+  const spawnShape = () => {
+    const type  = types[Math.floor(Math.random() * types.length)];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const size  = Math.random() * 28 + 13;
+    const xPx   = getSpawnX(size);
 
-      if (activeShapes.length > maxShapes) {
-        const oldest = activeShapes.shift()!;
-        gsap.to(oldest, {
-          y: `+=${vh * 0.3}`,
-          opacity: 0,
-          duration: 0.6,
-          ease: 'power2.in',
-          onComplete: () => oldest.remove(),
-        });
-      }
-    };
+    // Find where this shape would land on top of the current pile
+    const pileTopY = getPileTop(xPx, size);
+    const landedY  = pileTopY - size;
 
-    // Preenchimento inicial denso
-    const initialCount = side === 'bottom' ? 30 : 50;
-    for (let i = 0; i < initialCount; i++) {
-      setTimeout(spawnShape, i * 80);
+    // Skip if pile is already too tall at this x
+    if (landedY < vh - MAX_PILE_H) return;
+
+    const el = document.createElement('div');
+    el.className = `shape ${type}`;
+
+    if (type !== 'triangle') {
+      el.style.width  = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.backgroundColor = color;
+    } else {
+      el.style.setProperty('--shape-color', color);
+      el.style.borderLeftWidth   = `${size * 0.6}px`;
+      el.style.borderRightWidth  = `${size * 0.6}px`;
+      el.style.borderBottomWidth = `${size}px`;
     }
 
-    // Fluxo contínuo
-    setInterval(spawnShape, side === 'bottom' ? 900 : 500);
-  });
+    el.style.left   = `${xPx}px`;
+    el.style.top    = '0px';
+    el.style.bottom = 'auto';
+
+    container.appendChild(el);
+
+    // Reserve columns immediately so concurrent spawns don't stack in the same spot
+    claimColumns(xPx, size, landedY);
+
+    const entry: ShapeEntry = { el, xPx, size, landedY };
+    activeShapes.push(entry);
+
+    // Fall with gravity; opacity 0.08 (watery) → 1 (solid) as it descends
+    gsap.fromTo(el,
+      { y: -size - 20, rotation: Math.random() * 200 - 100, opacity: 0.08 },
+      {
+        y: landedY,
+        rotation: Math.random() * 16 - 8,
+        opacity: 1,
+        duration: Math.random() * 1.2 + 0.6,
+        ease: 'power2.in',
+      }
+    );
+
+    // When over the limit, drop the oldest shape off the bottom
+    if (activeShapes.length > MAX_SHAPES) {
+      const oldest = activeShapes.shift()!;
+      gsap.to(oldest.el, {
+        y: `+=${vh * 0.35}`,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power2.in',
+        onComplete: () => {
+          oldest.el.remove();
+          recalcHeightMap(activeShapes);
+        },
+      });
+    }
+  };
+
+  // Dense initial fill — edge zones first, then scatter
+  for (let i = 0; i < 85; i++) {
+    setTimeout(spawnShape, i * 65);
+  }
+  setInterval(spawnShape, 260);
 };
 
 // Toggle de tema com persistência e tipagem
 (() => {
-  const btn = document.getElementById('themeToggle') as HTMLButtonElement | null;
+  const btn  = document.getElementById('themeToggle') as HTMLButtonElement | null;
   const root = document.documentElement;
 
   if (btn) {
     btn.addEventListener('click', () => {
-      const currentTheme = root.getAttribute('data-theme');
-      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
-      root.setAttribute('data-theme', nextTheme);
-      localStorage.setItem('tn-theme', nextTheme);
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('tn-theme', next);
     });
   }
 
-  // Lógica para destacar o link ativo na navegação
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   const navLinks = document.querySelectorAll('nav a') as NodeListOf<HTMLAnchorElement>;
-
   navLinks.forEach(link => {
     const href = link.getAttribute('href');
     if (href === currentPage || (currentPage === 'index.html' && href === './')) {
@@ -170,16 +151,14 @@ const initShapeBed = () => {
     }
   });
 
-  // Inicializa formas e animação de entrada
   window.addEventListener('DOMContentLoaded', () => {
     initShapes();
-    initShapeBed();
-    
+
     gsap.from('main', {
       opacity: 0,
       y: 20,
       duration: 0.8,
-      ease: 'power2.out'
+      ease: 'power2.out',
     });
   });
 })();
